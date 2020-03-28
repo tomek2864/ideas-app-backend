@@ -1,7 +1,7 @@
 import passport from "passport";
 import passportLocal from "passport-local";
 import jwt from "jsonwebtoken";
-import { Request } from "express";
+import { Request, NextFunction } from "express";
 
 import { User, UserDocument } from "../models/schema/User";
 
@@ -65,4 +65,23 @@ export  const login = (req: Request, user: UserDocument) => {
         return resolve(signToken(user));
       });
     });
+  };
+
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export const checkIsInRole = (...roles: Array<string>) => (req: any, res: any, next: NextFunction) => {
+    if (!req.user) {
+      return res
+      .status(401)
+      .send("UNAUTHORIZED");
+    }
+  
+    const hasRole = roles.find((role: string )=> req.user.userType === role);
+    if (!hasRole) {
+      return res
+        .status(401)
+        .send("UNAUTHORIZED");
+    }
+  
+    return next();
   };

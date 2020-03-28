@@ -10,7 +10,7 @@ import "../config/utils";
 import { to } from "await-to-js";
 import { login } from "../config/utils";
 import { createUser } from "../models/user";
-
+import { UserType } from "../models/schema/User";
 /**
  * POST /login
  * Sign in using email and password.
@@ -46,7 +46,7 @@ export const postLogin = async (req: Request, res: Response, next: NextFunction)
             return res
             .status(200)
             .json({ success: true, 
-                profile : user.profile, email: user.email, accessToken, /* session: req.session,  redirect: req.session.returnTo,*/ });
+                profile : user.profile, role: user.userType, email: user.email, accessToken, /* session: req.session,  redirect: req.session.returnTo,*/ });
         });
     })(req, res, next);
 };
@@ -80,6 +80,7 @@ export const postSignup = async (req: Request, res: Response) => {
         createUser({
           email,
           password,
+          premium: UserType.FREE
         }),
       );
 

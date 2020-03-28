@@ -12,8 +12,8 @@ import lusca from "lusca";
 import mongoose from "mongoose";
 import bluebird from "bluebird";
 
-import { initialiseAuthentication } from "./config";
-
+import { initialiseAuthentication, utils  } from "./config";
+import { UserType } from "./models/schema/User";
 const MongoStore = mongo(session);
 const mongoUrl = MONGODB_URI;
 
@@ -60,6 +60,7 @@ initialiseAuthentication(app);
 /* app.get("/", authController.index); */
 app.post("/login", authController.postLogin);
 app.post("/signup", authController.postSignup);
-app.post("/account/profile", passport.authenticate("jwt", { session: false }), authController.postUpdateProfile);
+app.post("/account/profile", passport.authenticate("jwt", { session: false}), utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), authController.postUpdateProfile);
+
 
 export default app;

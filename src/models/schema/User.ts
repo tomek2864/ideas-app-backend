@@ -3,11 +3,22 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import mongoose from "mongoose";
 
+export enum UserType {
+    FREE= "FREE",
+    PREMIUM = "PREMIUM",
+    ADMIN = "ADMIN"
+};
+
 export type UserDocument = mongoose.Document & {
     email: string;
     password: string;
     passwordResetToken: string;
     passwordResetExpires: Date;
+    userType: {
+        type: string;
+        enum: ["FREE", "PREMIUM", "ADMIN"];
+        default: "FREE";
+    };
 
     //facebook: string;
     profile: {
@@ -29,6 +40,12 @@ const userSchema = new mongoose.Schema({
     password: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    userType: {
+        type: String,
+        enum : ["FREE", "PREMIUM", "ADMIN"],
+        default: "FREE"
+    },
+
 
     facebook: String,
     twitter: String,
