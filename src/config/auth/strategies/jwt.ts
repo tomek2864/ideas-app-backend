@@ -18,7 +18,6 @@ export const strategy = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const verifyCallback = async (req: any, jwtPayload: any, cb: any) => {
     const [err, user] = await to(getUserById(jwtPayload._id));
-    console.log("Strategy");
     if (err) {
       return cb(err);
     }

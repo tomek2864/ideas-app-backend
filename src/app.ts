@@ -2,6 +2,7 @@ import express from "express";
 
 
 import * as authController from "./controllers/auth";
+import * as projectController from "./controllers/project";
 import bodyParser from "body-parser";
 import session from "express-session";
 import { SESSION_SECRET, MONGODB_URI } from "./util/secrets";
@@ -60,7 +61,30 @@ initialiseAuthentication(app);
 /* app.get("/", authController.index); */
 app.post("/login", authController.postLogin);
 app.post("/signup", authController.postSignup);
-app.post("/account/profile", passport.authenticate("jwt", { session: false}), utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), authController.postUpdateProfile);
+app.post("/account/profile", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    authController.postUpdateProfile);
+app.post("/account/project", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.createProject);
+app.get("/account/project", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.getProjects);
+app.get("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.getProject);
+app.put("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.updateProject);
+app.delete("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.deleteProject);
 
 
 export default app;
