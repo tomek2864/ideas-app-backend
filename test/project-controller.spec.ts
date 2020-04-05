@@ -16,7 +16,7 @@ describe("Auth Controller", function() {
       });
     it("should create new FREE user", async function () {
         const req = {
-            email : "test@test.pl",
+            email: "test@test.pl",
             password: "Test1234",
             confirmPassword: "Test1234",
         };
@@ -26,21 +26,80 @@ describe("Auth Controller", function() {
                 (res.status).should.be.equal(200);
                 (res.body.success).should.be.equal(true);
                 (res.body.data.email).should.be.equal(req.email);
-                (res.body.data.role).should.be.equal("FREE");
-                expect(res.body.data).to.have.all.keys("role", "email");
+                (res.body.data.type).should.be.equal("FREE");
+                expect(res.body).to.have.all.keys("data", "success");
+                expect(res.body.data).to.have.all.keys("type", "email");
             });
     });
-    it("should be retried another 2 times", async function () {
+    it("should return error user exist", async function () {
         const req = {
-            title : "First example project4",
-            subtitle: "nwoo tyty",
-            description: ""
+            email: "test@test.pl",
+            password: "Test1234",
+            confirmPassword: "Test1234",
         };
         await request(app)
-            .post("/account/project").send(req)
-            .then((res) => console.log(res.status))
-            .catch((err) => console.log(err.status));
+            .post("/signup").send(req)
+            .then((res) => {
+                (res.status).should.be.equal(400);
+                (res.body.success).should.be.equal(false);
+                (res.body.errors[0].msg).should.be.equal("email_exist");
+                (res.body.errors[0].param).should.be.equal("email");
+                expect(res.body).to.have.all.keys("errors", "success");
+                expect(res.body.errors[0]).to.have.all.keys("msg", "param");
+            });
     });
+    it("should return error invalid email", async function () {
+        const req = {
+            email: "test1",
+            password: "Test1234",
+            confirmPassword: "Test12345",
+        };
+        await request(app)
+            .post("/signup").send(req)
+            .then((res) => {
+                (res.status).should.be.equal(400);
+                (res.body.success).should.be.equal(false);
+                (res.body.errors[0].msg).should.be.equal("email_invalid");
+                (res.body.errors[0].param).should.be.equal("email");
+                expect(res.body).to.have.all.keys("errors", "success");
+                expect(res.body.errors[0]).to.have.all.keys("msg", "param");
+            });
+    });
+    it("should return error passwords do not match", async function () {
+        const req = {
+            email: "test1@test.pl",
+            password: "Test1234",
+            confirmPassword: "Test12345",
+        };
+        await request(app)
+            .post("/signup").send(req)
+            .then((res) => {
+                (res.status).should.be.equal(400);
+                (res.body.success).should.be.equal(false);
+                (res.body.errors[0].msg).should.be.equal("passwords_do_not_match");
+                (res.body.errors[0].param).should.be.equal("confirmPassword");
+                expect(res.body).to.have.all.keys("errors", "success");
+                expect(res.body.errors[0]).to.have.all.keys("msg", "param");
+            });
+    });
+    it("should return error password too short", async function () {
+        const req = {
+            email: "test1@test.pl",
+            password: "Test",
+            confirmPassword: "Test",
+        };
+        await request(app)
+            .post("/signup").send(req)
+            .then((res) => {
+                (res.status).should.be.equal(400);
+                (res.body.success).should.be.equal(false);
+                (res.body.errors[0].msg).should.be.equal("password_too_short");
+                (res.body.errors[0].param).should.be.equal("password");
+                expect(res.body).to.have.all.keys("errors", "success");
+                expect(res.body.errors[0]).to.have.all.keys("msg", "param");
+            });
+    });
+
     /* after((done) =>{
         mongoose.disconnect()
         .then(() => console.log("Disconnect"))

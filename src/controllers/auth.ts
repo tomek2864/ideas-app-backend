@@ -11,6 +11,7 @@ import { to } from "await-to-js";
 import { login } from "../config/utils";
 import { createUser } from "../models/user";
 import { UserType } from "../models/schema/User";
+import { errorFormatter } from "./helpers";
 /**
  * POST /login
  * Sign in using email and password.
@@ -58,11 +59,11 @@ export const postLogin = async (req: Request, res: Response, next: NextFunction)
  */
 export const postSignup = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/camelcase
-    await check("email", "Email is not valid").isEmail().normalizeEmail({ gmail_remove_dots: false }).run(req);
-    await check("password", "Password must be at least 4 characters long").isLength({ min: 4 }).run(req);
-    await check("confirmPassword", "Passwords do not match").equals(req.body.password).run(req);
+    await check("email", "email_invalid").isEmail().normalizeEmail({ gmail_remove_dots: false }).run(req);
+    await check("password", "password_too_short").isLength({ min: 8 }).run(req);
+    await check("confirmPassword", "passwords_do_not_match").equals(req.body.password).run(req);
     
-    const errors = validationResult(req);
+    const errors = validationResult(req).formatWith(errorFormatter);
 
     if (!errors.isEmpty()) {
         return res
@@ -70,11 +71,7 @@ export const postSignup = async (req: Request, res: Response) => {
         .json({ success: false, errors: errors.array() });
     }
 
-    const registrationEmailTakenError = () => {
-        return res
-          .status(400)
-          .json({ success: false, data: "Email is already taken." });
-      };
+
     const { email, password } = req.body;
     const [err, user] = await to(
         createUser({
@@ -85,7 +82,9 @@ export const postSignup = async (req: Request, res: Response) => {
       );
 
     if(err) {
-        registrationEmailTakenError();
+        return res
+          .status(400)
+          .json({ success: false, errors: [{msg: "email_exist", param: "email"}] });
     }
 
     const userToSend = user as UserDocument;  
@@ -96,7 +95,7 @@ export const postSignup = async (req: Request, res: Response) => {
       success: true,
       data: {
           email: userToSend.email,
-          role: userToSend.userType,
+          type: userToSend.userType,
       }
     });
 };
