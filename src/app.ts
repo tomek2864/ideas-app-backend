@@ -5,7 +5,7 @@ import * as authController from "./controllers/auth";
 import * as projectController from "./controllers/project";
 import bodyParser from "body-parser";
 import session from "express-session";
-import { SESSION_SECRET, MONGODB_URI } from "./util/secrets";
+import { SESSION_SECRET, MONGODB_URI, PORT } from "./util/secrets";
 import mongo from "connect-mongo";
 import compression from "compression";  // compresses requests
 import passport from "passport";
@@ -15,22 +15,14 @@ import bluebird from "bluebird";
 
 import { initialiseAuthentication, utils  } from "./config";
 import { UserType } from "./models/schema/User";
+import { connectDb } from "./util/database";
 const MongoStore = mongo(session);
 const mongoUrl = MONGODB_URI;
 
-
 mongoose.Promise = bluebird;
-
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true } ).then(
-    () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-).catch(err => {
-    console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
-    // process.exit();
-});
-
-
+connectDb(mongoUrl);
 const app = express();
-app.set("port", process.env.PORT || 3001);
+app.set("port", PORT || 3111);
 
 app.get("/test", (req, res) =>
     res.status(200).json({ msg: "Auth service" }),

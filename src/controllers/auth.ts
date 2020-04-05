@@ -88,11 +88,16 @@ export const postSignup = async (req: Request, res: Response) => {
         registrationEmailTakenError();
     }
 
+    const userToSend = user as UserDocument;  
+
     return res
     .status(200)
     .json({
       success: true,
-      data: user
+      data: {
+          email: userToSend.email,
+          role: userToSend.userType,
+      }
     });
 };
 
