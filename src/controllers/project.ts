@@ -38,6 +38,7 @@ import {
           try {
             collection
               .find()
+              /* .populate("subprojects") */
               .sort({ createdAt: sort === "desc" ? -1 : 1 })
               .skip(pageNumber > 0 ? ((pageNumber - 1) * nPerPage) : 0)
               .limit(parseInt(nPerPage, 10) || nPerPage)
@@ -89,7 +90,6 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
             title: req.body.title,
             subtitle: req.body.subtitle,
             description: req.body.description,
-            subprojects: [],
             updateDate: null,
         });
         newProject
@@ -98,7 +98,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
                 res.status(200).json({
                     success: true,
                     data: {
-                        id: project._id
+                        id: project
                     }
                 }),
             );
@@ -166,7 +166,27 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
             return res.status(422)
             .json({ success: false, errors: "Invalid id"});
             }
-        await Project.findById(req.params.id, (err, project) => {
+
+            await Project.findOne({_id: req.params.id})
+            .populate("subprojects", "title" )
+            .exec((err, project) => {
+              if (err) {
+                return res.status(422).json({
+                  success: false,
+                });
+              }
+              if (project === null) {
+                return res.status(404).json({
+                  success: false,
+                });
+              }
+              return res.status(200).json({
+                success: true,
+                data: project,
+              });
+            });
+
+        /* await Project.findById(req.params.id, (err, project) => {
           if (err) {
             return res.status(422).json({
               success: false,
@@ -181,7 +201,9 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
             success: true,
             data: project,
           });
-        });
+        }); */
+
+
       } catch {
         return res.status(400).json({
           success: false,
@@ -240,7 +262,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
 // @route   DELETE project/:id
 // @desc    Delete project by id
 // @access  Private
-export const deleteProject = async (req: Request, res: Response, next: NextFunction) => {
+/* export const deleteProject = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
         if (!idValidation) {
@@ -262,6 +284,32 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
             success: true,
           });
         });
+      } catch {
+        return res.status(400).json({
+          success: false,
+        });
+      }
+}; */
+export const deleteProject = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
+        if (!idValidation) {
+            return res.status(422)
+            .json({ success: false, errors: "Invalid id"});
+            }
+            //await Project.findOne({  _id: req.params.id }).remove().exec()
+            const doc = await Project.findOne({  _id: req.params.id });
+            await doc.remove()
+            .then(() => {
+              return res.status(200).json({
+                success: true,
+              });
+            })
+            .catch(() => {
+              return res.status(422).json({
+                success: false,
+              });
+            });
       } catch {
         return res.status(400).json({
           success: false,

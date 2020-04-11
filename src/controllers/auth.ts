@@ -46,6 +46,9 @@ export const postLogin = async (req: Request, res: Response, next: NextFunction)
             if (err) { return next(err); }
             return res
             .status(200)
+            .cookie("accessToken", accessToken, {
+                httpOnly: true,
+              })
             .json({ success: true, 
                 profile : user.profile, role: user.userType, email: user.email, accessToken, /* session: req.session,  redirect: req.session.returnTo,*/ });
         });

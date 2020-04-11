@@ -3,6 +3,7 @@ import express from "express";
 
 import * as authController from "./controllers/auth";
 import * as projectController from "./controllers/project";
+import * as subprojectController from "./controllers/subproject";
 import bodyParser from "body-parser";
 import session from "express-session";
 import { SESSION_SECRET, MONGODB_URI, PORT } from "./util/secrets";
@@ -20,6 +21,7 @@ const MongoStore = mongo(session);
 const mongoUrl = MONGODB_URI;
 
 mongoose.Promise = bluebird;
+mongoose.set("debug",true);
 connectDb(mongoUrl);
 const app = express();
 app.set("port", PORT || 3111);
@@ -30,7 +32,7 @@ app.get("/test", (req, res) =>
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
+/* app.use(session({
     resave: true,
     saveUninitialized: true,
     secret: SESSION_SECRET,
@@ -38,7 +40,7 @@ app.use(session({
         url: mongoUrl,
         autoReconnect: true
     })
-}));
+})); */
 app.use(passport.initialize());
   initialiseAuthentication(app);
 app.use(passport.session());
@@ -77,6 +79,12 @@ app.delete("/account/project/:id",
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.deleteProject);
+app.post("/account/subproject", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    subprojectController.createSubproject);
 
+
+    
 
 export default app;
