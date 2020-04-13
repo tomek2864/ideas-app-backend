@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { Subproject } from "./Subproject";
 
+const mongoosePaginate = require("mongoose-paginate");
+
 const ProjectSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -31,10 +33,11 @@ ProjectSchema.set("toJSON", { virtuals: true });
 ProjectSchema.pre("remove", function(next) {
   // 'this' is the client being removed. Provide callbacks here if you want
   // to be notified of the calls' result.
-  console.log("Test");
   Subproject.remove({ projectId: this._id }).exec();
   next();
 });
+
+ProjectSchema.plugin(mongoosePaginate);
 
 /* submissionSchema.pre('remove', function(next) {
   Client.update(

@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 
 const SubprojectSchema = new mongoose.Schema({
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: [true, "Title is require"],
   },
   title: {
     type: String,

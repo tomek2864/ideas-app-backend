@@ -10,11 +10,12 @@
     "test": "SET NODE_ENV=test&& find ./test -name '*spec.ts' | xargs mocha --exit -r ts-node/register ",
     "coverage": "nyc --reporter=html --reporter=text mocha --exit --timeout 15000",
     "build-ts": "tsc",
-    "lint-fix": "tsc --noEmit && eslint \"**/*.{js,ts}\" --fix"
+    "lint-fix": "tsc --noEmit && eslint --ext ts src --fix"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/mongoose-paginate": "^5.0.8",
     "async": "^3.2.0",
     "await-to-js": "^2.1.1",
     "bcrypt": "^4.0.0",
@@ -30,6 +31,7 @@
     "jsonwebtoken": "^8.5.1",
     "lusca": "^1.6.1",
     "mongoose": "^5.9.2",
+    "mongoose-paginate": "^5.0.3",
     "nodemailer": "^6.4.3",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
