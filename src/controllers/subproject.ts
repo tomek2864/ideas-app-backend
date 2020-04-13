@@ -66,9 +66,11 @@ export const updateSubproject = async (req: Request, res: Response, next: NextFu
     .isString()
     .notEmpty()
     .isLength({ max: 150 })
+    .optional()
     .run(req);
   await check("description")
     .isString()
+    .optional()
     .isLength({ max: 1500 })
     .run(req);
   
@@ -110,4 +112,35 @@ export const updateSubproject = async (req: Request, res: Response, next: NextFu
   } catch (err) {
     return res.status(500);
   }
+};
+
+export const deleteSubproject = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
+      if (!idValidation) {
+          return res.status(422)
+          .json({ success: false, errors: "Invalid id"});
+          }
+          await Subproject.findOne({  _id: req.params.id, userId: req.user })
+          .then(async (doc) => {
+            await doc.remove()
+            .then(() => {
+              return res.status(200).json({
+                success: true,
+              });
+            })
+            .catch(() => {
+              return res.status(422).json({
+                success: false,
+              });
+            });
+          })
+          .catch(() => {
+            return res.status(404).json({
+              success: false,
+            });
+          });
+  } catch (err) {
+    return res.status(500);
+}
 };

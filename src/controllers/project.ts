@@ -123,7 +123,7 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
             }
 
             await Project.findOne({_id: req.params.id, userId: req.user})
-            .populate("subprojects", "title" )
+            .populate("subprojects", "title description" )
             .exec((err, project) => {
               if (err) {
                 return res.status(422).json({
@@ -190,7 +190,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
       }
       try {            
         await Project.findOneAndUpdate(
-          {_id: req.params.id}, 
+          {_id: req.params.id, userId: req.user}, 
           { $set: updateData }, 
           {"new": true, "fields": "title subtitle description" }
         )
@@ -212,25 +212,32 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
   
 
 export const deleteProject = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
-        if (!idValidation) {
-            return res.status(422)
-            .json({ success: false, errors: "Invalid id"});
-            }
-            const doc = await Project.findOne({  _id: req.params.id });
-            await doc.remove()
-            .then(() => {
-              return res.status(200).json({
-                success: true,
-              });
-            })
-            .catch(() => {
-              return res.status(422).json({
-                success: false,
-              });
+  try {
+    const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!idValidation) {
+        return res.status(422)
+        .json({ success: false, errors: "Invalid id"});
+        }
+        await Project.findOne({  _id: req.params.id, userId: req.user })
+        .then(async (doc) => {
+          await doc.remove()
+          .then(() => {
+            return res.status(200).json({
+              success: true,
             });
-    } catch (err) {
-      return res.status(500);
-  }
+          })
+          .catch(() => {
+            return res.status(422).json({
+              success: false,
+            });
+          });
+        })
+        .catch(() => {
+          return res.status(404).json({
+            success: false,
+          });
+        });
+} catch (err) {
+  return res.status(500);
+}
 };

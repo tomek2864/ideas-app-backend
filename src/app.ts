@@ -83,10 +83,14 @@ app.post("/account/subproject",
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     subprojectController.createSubproject);
-app.put("/account/subproject", 
+app.put("/account/subproject/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     subprojectController.updateSubproject);
+app.delete("/account/subproject/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    subprojectController.deleteSubproject);
 
 
     
