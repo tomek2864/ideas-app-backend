@@ -13,6 +13,11 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: [true, "Title is require"],
   },
+  intentionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Intention"
+  },
   subtitle: String,
   description: String,
 }, { 

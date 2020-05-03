@@ -2,6 +2,7 @@ import express from "express";
 
 
 import * as authController from "./controllers/auth";
+import * as intentionController from "./controllers/intention";
 import * as projectController from "./controllers/project";
 import * as subprojectController from "./controllers/subproject";
 import bodyParser from "body-parser";
@@ -59,6 +60,28 @@ app.post("/account/profile",
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     authController.postUpdateProfile);
+
+app.post("/account/intention", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    intentionController.createIntention);
+app.get("/account/intentions", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    intentionController.getIntentions);
+app.get("/account/intention/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    intentionController.getIntention);
+app.put("/account/intention/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    intentionController.updateIntention);
+app.delete("/account/intention/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    intentionController.deleteIntention);
+    
 app.post("/account/project", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
@@ -79,6 +102,7 @@ app.delete("/account/project/:id",
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.deleteProject);
+
 app.post("/account/subproject", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
