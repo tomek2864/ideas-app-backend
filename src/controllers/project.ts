@@ -28,7 +28,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
-          return res.status(422).json({ success: false, errors: result.array() });
+          return res.status(400).json({ success: false, errors: result.array() });
         }
         const newProject = await Project.create({
             userId: req.user,
@@ -48,7 +48,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
                 }),
             )
             .catch(() => {
-              return res.status(400).json({ success: false });
+              return res.status(422).json({ success: false });
             });
       } catch (err) {
         return res.status(500);
@@ -78,7 +78,7 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
   try {
     const result = validationResult(req);
     if (!result.isEmpty()) {
-      return res.status(422).json({ success: false, errors: result.array() });
+      return res.status(400).json({ success: false, errors: result.array() });
     }
 
     const options = {
@@ -118,7 +118,7 @@ export const getProject = async (req: Request, res: Response, next: NextFunction
     try {
         const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
         if (!idValidation) {
-            return res.status(422)
+            return res.status(400)
             .json({ success: false, errors: "Invalid id"});
             }
 
@@ -173,7 +173,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
         return res.status(422).json({ success: false, errors: result.array() });
       }
       if (!idValidation) {
-        return res.status(422)
+        return res.status(400)
           .json({ success: false, errors: "Invalid id"});
       }
 
@@ -201,7 +201,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
           });
         })
         .catch((err) => {
-          res.status(400).json({
+          res.status(422).json({
           success: false,
         });
       });
@@ -215,7 +215,7 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
   try {
     const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idValidation) {
-        return res.status(422)
+        return res.status(400)
         .json({ success: false, errors: "Invalid id"});
         }
         await Project.findOne({  _id: req.params.id, userId: req.user })

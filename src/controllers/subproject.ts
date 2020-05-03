@@ -24,10 +24,10 @@ export const createSubproject = async (req: Request, res: Response, next: NextFu
         const result = validationResult(req);
         const idValidation = mongoose.Types.ObjectId.isValid(req.body.projectId);
         if (!result.isEmpty()) {
-          return res.status(422).json({ success: false, errors: result.array() });
+          return res.status(400).json({ success: false, errors: result.array() });
         }
         if (!idValidation) {
-          return res.status(422)
+          return res.status(400)
             .json({ success: false, errors: "Invalid project id"});
         }
 
@@ -51,7 +51,7 @@ export const createSubproject = async (req: Request, res: Response, next: NextFu
                         }
                     }),
                 )
-                .catch(() => res.status(400).json({ success: false }));
+                .catch(() => res.status(422).json({ success: false }));
         });
       } catch (err) {
         return res.status(500);
@@ -77,10 +77,10 @@ export const updateSubproject = async (req: Request, res: Response, next: NextFu
     const result = validationResult(req);
     const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!result.isEmpty()) {
-      return res.status(422).json({ success: false, errors: result.array() });
+      return res.status(400).json({ success: false, errors: result.array() });
     }
     if (!idValidation) {
-      return res.status(422)
+      return res.status(400)
         .json({ success: false, errors: "Invalid id"});
     }
 
@@ -105,7 +105,7 @@ export const updateSubproject = async (req: Request, res: Response, next: NextFu
         });
       })
       .catch((err) => {
-        res.status(400).json({
+        res.status(422).json({
         success: false,
       });
     });
@@ -118,7 +118,7 @@ export const deleteSubproject = async (req: Request, res: Response, next: NextFu
   try {
       const idValidation = mongoose.Types.ObjectId.isValid(req.params.id);
       if (!idValidation) {
-          return res.status(422)
+          return res.status(400)
           .json({ success: false, errors: "Invalid id"});
           }
           await Subproject.findOne({  _id: req.params.id, userId: req.user })
