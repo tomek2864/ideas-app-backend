@@ -2,9 +2,11 @@ import express from "express";
 
 
 import * as authController from "./controllers/auth";
+import * as projectController from "./controllers/project";
+import * as subprojectController from "./controllers/subproject";
 import bodyParser from "body-parser";
 import session from "express-session";
-import { SESSION_SECRET, MONGODB_URI } from "./util/secrets";
+import { SESSION_SECRET, MONGODB_URI, PORT } from "./util/secrets";
 import mongo from "connect-mongo";
 import compression from "compression";  // compresses requests
 import passport from "passport";
@@ -14,22 +16,15 @@ import bluebird from "bluebird";
 
 import { initialiseAuthentication, utils  } from "./config";
 import { UserType } from "./models/schema/User";
+import { connectDb } from "./util/database";
 const MongoStore = mongo(session);
 const mongoUrl = MONGODB_URI;
 
-
 mongoose.Promise = bluebird;
-
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true } ).then(
-    () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-).catch(err => {
-    console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
-    // process.exit();
-});
-
-
+mongoose.set("debug",true);
+connectDb(mongoUrl);
 const app = express();
-app.set("port", process.env.PORT || 3001);
+app.set("port", PORT || 3111);
 
 app.get("/test", (req, res) =>
     res.status(200).json({ msg: "Auth service" }),
@@ -37,7 +32,7 @@ app.get("/test", (req, res) =>
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
+/* app.use(session({
     resave: true,
     saveUninitialized: true,
     secret: SESSION_SECRET,
@@ -45,7 +40,7 @@ app.use(session({
         url: mongoUrl,
         autoReconnect: true
     })
-}));
+})); */
 app.use(passport.initialize());
   initialiseAuthentication(app);
 app.use(passport.session());
@@ -60,7 +55,44 @@ initialiseAuthentication(app);
 /* app.get("/", authController.index); */
 app.post("/login", authController.postLogin);
 app.post("/signup", authController.postSignup);
-app.post("/account/profile", passport.authenticate("jwt", { session: false}), utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), authController.postUpdateProfile);
+app.post("/account/profile", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    authController.postUpdateProfile);
+app.post("/account/project", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.createProject);
+app.get("/account/project", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.getProjects);
+app.get("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.getProject);
+app.put("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.updateProject);
+app.delete("/account/project/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    projectController.deleteProject);
+app.post("/account/subproject", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    subprojectController.createSubproject);
+app.put("/account/subproject/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    subprojectController.updateSubproject);
+app.delete("/account/subproject/:id", 
+    passport.authenticate("jwt", { session: false}), 
+    utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
+    subprojectController.deleteSubproject);
 
+
+    
 
 export default app;
