@@ -23,7 +23,11 @@ export type UserDocument = mongoose.Document & {
     //facebook: string;
     profile: {
         name: string;
-        gender: string;
+        gender: {
+            type: string | null;
+            enum: ["male", "female", "uni"];
+            default: null;
+        };
         location: string;
         website: string;
         picture: string;

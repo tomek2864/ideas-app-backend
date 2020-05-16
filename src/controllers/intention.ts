@@ -4,12 +4,13 @@ import {
     validationResult,
     buildCheckFunction,
   } from "express-validator";
-  import { Intention } from "../models/schema";
+  import { Intention, IntentionDocument } from "../models/schema";
   import mongoose from "mongoose";
   const checkBodyAndQuery = buildCheckFunction(["body", "query",]);
 
 // @route   POST /intention
 // @desc    Create new intention
+
 export const createIntention = async (req: Request, res: Response, next: NextFunction) => {
   await check("title")
     .isString()
@@ -130,9 +131,16 @@ export const getIntention = async (req: Request, res: Response, next: NextFuncti
                   success: false,
                 });
               }
+              const intentionToSend = intention as IntentionDocument;  
               return res.status(200).json({
                 success: true,
-                data: intention,
+                data: {
+                  id: intentionToSend.id,
+                  title: intentionToSend.title,
+                  description: intentionToSend.description,
+                  projects: intentionToSend.projects,
+                  createdAt: intentionToSend.createdAt,
+                },
               });
             });
       } catch (err) {
@@ -164,7 +172,7 @@ export const updateIntention = async (req: Request, res: Response, next: NextFun
       }
       if (!idValidation) {
         return res.status(400)
-          .json({ success: false, errors: "Invalid id"});
+          .json({ success: false, errors: ["Invalid id"]});
       }
 
       const updateData: any = {};

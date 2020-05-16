@@ -110,7 +110,30 @@ export const postSignup = async (req: Request, res: Response) => {
 export const postUpdateProfile = async (req: Request, res: Response, next: NextFunction) => {
     // eslint-disable-next-line @typescript-eslint/camelcase
     await check("email", "Please enter a valid email address.").isEmail().normalizeEmail({ gmail_remove_dots: false }).run(req);
-    
+    await check("name")
+      .optional()
+      .isString()
+      .notEmpty()
+      .isLength({ max: 150 })
+      .run(req);
+    await check("location")
+      .optional()
+      .isString()
+      .notEmpty()
+      .isLength({ max: 150 })
+      .run(req);
+    await check("website")
+      .optional()
+      .isString()
+      .notEmpty()
+      .isLength({ max: 150 })
+      .run(req);
+    await check("gender")
+      .optional()
+      .isString()
+      .isIn(["male", "female", "uni"])
+      .run(req);
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -124,7 +147,7 @@ export const postUpdateProfile = async (req: Request, res: Response, next: NextF
         if (err) { return next(err); }
         user.email = req.body.email || "";
         user.profile.name = req.body.name || "";
-        user.profile.gender = req.body.gender || "";
+        user.profile.gender = req.body.gender || null;
         user.profile.location = req.body.location || "";
         user.profile.website = req.body.website || "";
         user.save((err: WriteError) => {

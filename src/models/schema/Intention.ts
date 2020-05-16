@@ -9,11 +9,13 @@ const IntentionSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "Title is require"],
   },
-  items: {
-    type: Project,
+  title: {
+    type: String,
     required: [true, "Title is require"],
   },
-  description: String,
+  description: {
+    type: String,
+  },
 }, { 
   timestamps: true
 });
@@ -52,7 +54,9 @@ export type IntentionDocument = mongoose.Document & {
     type: string;
     required: [true, "Title is require"];
   };
-  subtitle: string;
   description: string;
+  createdAt: string;
+  updateAt: string;
+  projects: [string];
 };
 

@@ -14,6 +14,9 @@ import passport from "passport";
 import lusca from "lusca";
 import mongoose from "mongoose";
 import bluebird from "bluebird";
+import swaggerUi from "swagger-ui-express";
+
+
 
 import { initialiseAuthentication, utils  } from "./config";
 import { UserType } from "./models/schema/User";
@@ -33,15 +36,7 @@ app.get("/test", (req, res) =>
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-/* app.use(session({
-    resave: true,
-    saveUninitialized: true,
-    secret: SESSION_SECRET,
-    store: new MongoStore({
-        url: mongoUrl,
-        autoReconnect: true
-    })
-})); */
+
 app.use(passport.initialize());
   initialiseAuthentication(app);
 app.use(passport.session());
@@ -53,65 +48,72 @@ app.use((req, res, next) => {
 });
 initialiseAuthentication(app);
 
+try {
+    const swaggerDocument = require("../swagger.json");
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+} catch (err) {
+    console.error("Unable to read swagger.json", err);
+}    
+
 /* app.get("/", authController.index); */
-app.post("/login", authController.postLogin);
-app.post("/signup", authController.postSignup);
-app.post("/account/profile", 
+app.post("/api/v1/login", authController.postLogin);
+app.post("/api/v1/signup", authController.postSignup);
+app.post("/api/v1/account/profile", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     authController.postUpdateProfile);
 
-app.post("/account/intention", 
+app.post("/api/v1/intention", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     intentionController.createIntention);
-app.get("/account/intentions", 
+app.get("/api/v1/intentions", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     intentionController.getIntentions);
-app.get("/account/intention/:id", 
+app.get("/api/v1/intention/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     intentionController.getIntention);
-app.put("/account/intention/:id", 
+app.put("/api/v1/intention/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     intentionController.updateIntention);
-app.delete("/account/intention/:id", 
+app.delete("/api/v1/intention/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     intentionController.deleteIntention);
     
-app.post("/account/project", 
+app.post("/api/v1/project", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.createProject);
-app.get("/account/project", 
+app.get("/api/v1/project", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.getProjects);
-app.get("/account/project/:id", 
+app.get("/api/v1/project/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.getProject);
-app.put("/account/project/:id", 
+app.put("/api/v1/project/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.updateProject);
-app.delete("/account/project/:id", 
+app.delete("/api/v1/project/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     projectController.deleteProject);
 
-app.post("/account/subproject", 
+app.post("/api/v1/subproject", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     subprojectController.createSubproject);
-app.put("/account/subproject/:id", 
+app.put("/api/v1/subproject/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     subprojectController.updateSubproject);
-app.delete("/account/subproject/:id", 
+app.delete("/api/v1/subproject/:id", 
     passport.authenticate("jwt", { session: false}), 
     utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN), 
     subprojectController.deleteSubproject);
