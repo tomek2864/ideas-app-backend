@@ -1,6 +1,6 @@
 import { User } from "../schema";
 
-async function getUserById(id: string ) {
+async function getUserById(id: string) {
   return await User.findById(id).exec();
 }
 

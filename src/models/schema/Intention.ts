@@ -3,35 +3,37 @@ import { Project } from "./Project";
 
 const mongoosePaginate = require("mongoose-paginate");
 
-const IntentionSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: [true, "Title is require"],
+const IntentionSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Title is require"],
+    },
+    title: {
+      type: String,
+      required: [true, "Title is require"],
+    },
+    description: {
+      type: String,
+    },
   },
-  title: {
-    type: String,
-    required: [true, "Title is require"],
+  {
+    timestamps: true,
   },
-  description: {
-    type: String,
-  },
-}, { 
-  timestamps: true
-});
+);
 
 IntentionSchema.virtual("projects", {
   ref: "Project",
   localField: "_id",
   foreignField: "intentionId",
-  justOne: false // set true for one-to-one relationship
+  justOne: false, // set true for one-to-one relationship
 });
 
 IntentionSchema.set("toObject", { virtuals: true });
 IntentionSchema.set("toJSON", { virtuals: true });
 
-
-IntentionSchema.pre("remove", function(next) {
+IntentionSchema.pre("remove", function (next) {
   // 'this' is the client being removed. Provide callbacks here if you want
   // to be notified of the calls' result.
   Project.remove({ intentionId: this._id }).exec();
@@ -39,8 +41,6 @@ IntentionSchema.pre("remove", function(next) {
 });
 
 IntentionSchema.plugin(mongoosePaginate);
-
-
 
 export const Intention = mongoose.model("Intention", IntentionSchema);
 
@@ -59,4 +59,3 @@ export type IntentionDocument = mongoose.Document & {
   updateAt: string;
   projects: [string];
 };
-

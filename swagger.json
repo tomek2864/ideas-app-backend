@@ -17,18 +17,22 @@
   ],
   "tags": [
     {
-      "name": "user-controller",
-      "description": "User account managment"
+      "name": "auth-controller",
+      "description": "CRUD for Authentication and User Management"
     },
     {
       "name": "intention-controller",
-      "description": "CRUD for intention"
+      "description": "CRUD for Intentions"
+    },
+    {
+      "name": "project-controller",
+      "description": "CRUD for Projects"
     }
   ],
   "paths": {
     "/api/v1/account/profile": {
       "post": {
-        "tags": ["user-controller"],
+        "tags": ["auth-controller"],
         "summary": "Update user profile",
         "operationId": "updateProfileUsingPOST",
         "requestBody": {
@@ -146,13 +150,41 @@
         "tags": ["intention-controller"],
         "summary": "Get all intentions",
         "operationId": "getIntentions",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Number of page(min: 1)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "itemsPerPage",
+            "in": "query",
+            "description": "Items per page(min: 1, max: 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sorting",
+            "in": "query",
+            "description": "Sorting by createdAt",
+            "allowEmptyValue": true,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "User intentions",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/IntentionContent"
+                  "$ref": "#/components/schemas/IntentionContentResponse"
                 }
               }
             }
@@ -165,7 +197,14 @@
                   "type": "object",
                   "example": {
                     "success": false,
-                    "errors": []
+                    "errors": [
+                      {
+                        "value": "0",
+                        "msg": "Invalid value",
+                        "param": "pageNumber",
+                        "location": "query"
+                      }
+                    ]
                   }
                 }
               }
@@ -216,7 +255,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/IntentionContent"
+                  "$ref": "#/components/schemas/IntentionContentResponse"
                 }
               }
             }
@@ -270,25 +309,447 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "title",
-            "in": "body",
-            "description": "Intention title"
-          },
-          {
-            "name": "description",
-            "in": "body",
-            "description": "Intention description"
           }
         ],
+        "requestBody": {
+          "description": "Updated intention content",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntentionContent"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Intention updated",
             "content": {
               "*/*": {
                 "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": ["Invalid id"]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      },
+      "delete": {
+        "tags": ["intention-controller"],
+        "summary": "Delete intention by id",
+        "operationId": "deleteIntentionById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of intention",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intention deleted",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": ["Invalid id"]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      }
+    },
+    "/api/v1/project": {
+      "post": {
+        "tags": ["project-controller"],
+        "summary": "Create new project",
+        "operationId": "createNewProject",
+        "requestBody": {
+          "description": "New project content",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProjectContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Project created",
+            "content": {
+              "*/*": {
+                "schema": {
                   "$ref": "#/components/schemas/IdHolder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": ["Invalid intention id"]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      }
+    },
+    "/api/v1/projects/{intentionId}": {
+      "get": {
+        "tags": ["project-controller"],
+        "summary": "Get all projects by intention id",
+        "operationId": "getProjects",
+        "parameters": [
+          {
+            "name": "intentionId",
+            "in": "path",
+            "description": "Id of intention",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Number of page(min: 1)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "itemsPerPage",
+            "in": "query",
+            "description": "Items per page(min: 1, max: 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sorting",
+            "in": "query",
+            "description": "Sorting by createdAt",
+            "allowEmptyValue": true,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User projects",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectContentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": [
+                      {
+                        "value": "0",
+                        "msg": "Invalid value",
+                        "param": "pageNumber",
+                        "location": "query"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      }
+    },
+    "/api/v1/project/{id}": {
+      "get": {
+        "tags": ["project-controller"],
+        "summary": "Get project by id",
+        "operationId": "getProjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectContentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": ["Invalid id"]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      },
+      "put": {
+        "tags": ["project-controller"],
+        "summary": "Update project by id",
+        "operationId": "updateProjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated project content",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Project updated",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request, invalid request data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false,
+                    "errors": ["Invalid id"]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "Bearer <JWT>": []
+          }
+        ],
+        "x-codegen-request-body-name": "description"
+      },
+      "delete": {
+        "tags": ["project-controller"],
+        "summary": "Delete project by id",
+        "operationId": "deleteProjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project deleted",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
                 }
               }
             }
@@ -353,7 +814,7 @@
         }
       },
       "NewIntentionContent": {
-        "title": "IntentionContent",
+        "title": "NewIntentionContent",
         "type": "object",
         "properties": {
           "title": {
@@ -364,8 +825,8 @@
           }
         }
       },
-      "IntentionContent": {
-        "title": "IntentionContent",
+      "IntentionContentResponse": {
+        "title": "IntentionContentResponse",
         "type": "object",
         "properties": {
           "id": {
@@ -384,6 +845,121 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          }
+        }
+      },
+      "IntentionContentResponseUpdated": {
+        "title": "IntentionContentResponseUpdated",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "NewProjectContent": {
+        "title": "NewProjectContent",
+        "type": "object",
+        "properties": {
+          "intentionId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectContent": {
+        "title": "ProjectContent",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectContentResponse": {
+        "title": "ProjectContentResponse",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "subprojects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProjectContentResponseUpdated": {
+        "title": "ProjectContentResponseUpdated",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "subtitle": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              }
             }
           }
         }

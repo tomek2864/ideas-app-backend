@@ -1,4 +1,3 @@
-import {strategy as JWTStrategy }from "./jwt";
-
+import { strategy as JWTStrategy } from "./jwt";
 
 export { JWTStrategy };

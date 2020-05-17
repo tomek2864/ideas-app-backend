@@ -1,11 +1,8 @@
 // imports of testing libraries 
-import * as mocha from "mocha";
 import * as chai from "chai";
-import sinon = require("sinon");
 
 import {agent as request} from "supertest";
 import app from "../src/app";
-const should = chai.should();
 const expect = chai.expect;
 
 

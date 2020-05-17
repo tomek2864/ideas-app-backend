@@ -3,39 +3,41 @@ import { Subproject } from "./Subproject";
 
 const mongoosePaginate = require("mongoose-paginate");
 
-const ProjectSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: [true, "Title is require"],
+const ProjectSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Title is require"],
+    },
+    title: {
+      type: String,
+      required: [true, "Title is require"],
+    },
+    intentionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Intention",
+    },
+    subtitle: String,
+    description: String,
   },
-  title: {
-    type: String,
-    required: [true, "Title is require"],
+  {
+    timestamps: true,
   },
-  intentionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Intention"
-  },
-  subtitle: String,
-  description: String,
-}, { 
-  timestamps: true
-});
+);
 
 ProjectSchema.virtual("subprojects", {
   ref: "Subproject",
   localField: "_id",
   foreignField: "projectId",
-  justOne: false // set true for one-to-one relationship
+  justOne: false, // set true for one-to-one relationship
 });
 
 ProjectSchema.set("toObject", { virtuals: true });
 ProjectSchema.set("toJSON", { virtuals: true });
 
-
-ProjectSchema.pre("remove", function(next) {
+ProjectSchema.pre("remove", function (next) {
   // 'this' is the client being removed. Provide callbacks here if you want
   // to be notified of the calls' result.
   Subproject.remove({ projectId: this._id }).exec();
@@ -67,5 +69,6 @@ export type ProjectDocument = mongoose.Document & {
   };
   subtitle: string;
   description: string;
+  createdAt: string;
+  updateAt: string;
 };
-
