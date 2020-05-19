@@ -27,12 +27,19 @@ const ProjectSchema = new mongoose.Schema(
   },
 );
 
-ProjectSchema.virtual("subprojects", {
+ProjectSchema.virtual("issues", {
+  ref: "Issue",
+  localField: "_id",
+  foreignField: "issuesId",
+  justOne: false, // set true for one-to-one relationship
+});
+
+/* ProjectSchema.virtual("subprojects", {
   ref: "Subproject",
   localField: "_id",
   foreignField: "projectId",
   justOne: false, // set true for one-to-one relationship
-});
+}); */
 
 ProjectSchema.set("toObject", { virtuals: true });
 ProjectSchema.set("toJSON", { virtuals: true });
