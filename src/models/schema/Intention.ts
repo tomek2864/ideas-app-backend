@@ -8,7 +8,7 @@ const IntentionSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Title is require"],
+      required: [true, "UserId is require"],
     },
     title: {
       type: String,
@@ -48,7 +48,7 @@ export type IntentionDocument = mongoose.Document & {
   userId: {
     type: mongoose.Schema.Types.ObjectId;
     ref: "User";
-    required: [true, "Title is require"];
+    required: [true, "UserId is require"];
   };
   title: {
     type: string;
