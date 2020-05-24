@@ -4,3 +4,11 @@ export const errorFormatter = ({ msg, param }: any) => {
     param: `${param}`,
   };
 };
+
+
+export const errorResponse = (errors: Array<string>) => {
+  return {
+    success: false,
+    errors
+  };
+};

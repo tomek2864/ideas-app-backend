@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { IssueType, IssueStatus, IssuePriority } from "../../constants/issues";
 
+const mongoosePaginate = require("mongoose-paginate");
+
 const IssueSchema = new mongoose.Schema(
   {
     projectId: {
@@ -55,8 +57,7 @@ const IssueSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Issue = mongoose.model("Issue", IssueSchema);
-
+IssueSchema.plugin(mongoosePaginate);
 
 export type IssueDocument = mongoose.Document & {
     reporter: {
@@ -103,3 +104,6 @@ export type IssueDocument = mongoose.Document & {
           type: number;
       };
   };
+
+  
+export const Issue = mongoose.model<IssueDocument>("Issue", IssueSchema);

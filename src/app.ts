@@ -4,6 +4,7 @@ import * as authController from "./controllers/auth";
 import * as intentionController from "./controllers/intention";
 import * as projectController from "./controllers/project";
 import * as subprojectController from "./controllers/subproject";
+import * as issueController from "./controllers/issue";
 import bodyParser from "body-parser";
 import session from "express-session";
 import { SESSION_SECRET, MONGODB_URI, PORT } from "./util/secrets";
@@ -139,6 +140,13 @@ app.delete(
   passport.authenticate("jwt", { session: false }),
   utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN),
   subprojectController.deleteSubproject,
+);
+
+app.post(
+  "/api/v1/issue",
+  passport.authenticate("jwt", { session: false }),
+  utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN),
+  issueController.createIssue,
 );
 
 export default app;

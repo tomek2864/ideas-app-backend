@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { check, validationResult, buildCheckFunction } from "express-validator";
-import { Project, ProjectDocument } from "../models/schema";
+import { Project, ProjectDocument, Intention, IntentionDocument } from "../models/schema";
 import mongoose from "mongoose";
 const checkBodyAndQuery = buildCheckFunction(["body", "query"]);
 
@@ -21,27 +21,36 @@ export const createProject = async (req: Request, res: Response) => {
     if (!idValidation) {
       return res.status(400).json({ success: false, errors: ["Invalid intention id"] });
     }
+    await Intention.findById({ _id: req.body.intentionId, userId: req.user }, async function (err, intention: IntentionDocument) {
+      if (err) {
+        return res.status(400).json({ success: false });
+      }
+      if (!intention) {
+        return res.status(404).json({ success: false });
+      }
 
-    const newProject = await Project.create({
-      userId: req.user,
-      intentionId: req.body.intentionId,
-      title: req.body.title,
-      subtitle: req.body.subtitle,
-      description: req.body.description,
-    });
-    newProject
-      .save()
-      .then((project) =>
-        res.status(200).json({
-          success: true,
-          data: {
-            id: project._id,
-          },
-        }),
-      )
-      .catch(() => {
-        return res.status(422).json({ success: false });
+      const newProject = await Project.create({
+        userId: req.user,
+        intentionId: req.body.intentionId,
+        title: req.body.title,
+        subtitle: req.body.subtitle,
+        description: req.body.description,
+        key:"ABC"
       });
+      newProject
+        .save()
+        .then((project) =>
+          res.status(200).json({
+            success: true,
+            data: {
+              id: project._id,
+            },
+          }),
+        )
+        .catch(() => {
+          return res.status(422).json({ success: false });
+        });
+    });
   } catch (err) {
     return res.status(500);
   }
@@ -127,6 +136,7 @@ export const getProject = async (req: Request, res: Response) => {
             title: projectToSend.title,
             subtitle: projectToSend.subtitle,
             description: projectToSend.description,
+            key: projectToSend.key,
             createdAt: projectToSend.createdAt,
             updatedAt: projectToSend.createdAt,
           },

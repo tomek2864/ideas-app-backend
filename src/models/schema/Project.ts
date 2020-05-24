@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { Subproject } from "./Subproject";
+import { Issue } from "./Issue";
+import { resolve } from "bluebird";
 
 const mongoosePaginate = require("mongoose-paginate");
 
@@ -21,6 +23,7 @@ const ProjectSchema = new mongoose.Schema(
     },
     subtitle: String,
     description: String,
+    key: String,
   },
   {
     timestamps: true,
@@ -51,18 +54,14 @@ ProjectSchema.pre("remove", function (next) {
   next();
 });
 
+
+ProjectSchema.methods.generateIssueKeyName = async function () {
+  const issueKey = await Issue.find({ projectId: this._id });
+  return `${this.key}-${issueKey.length + 1}`;
+};
+
+
 ProjectSchema.plugin(mongoosePaginate);
-
-/* submissionSchema.pre('remove', function(next) {
-  Client.update(
-      { submission_ids : this._id}, 
-      { $pull: { submission_ids: this._id } },
-      { multi: true })  //if reference exists in multiple documents 
-  .exec();
-  next();
-}); */
-
-export const Project = mongoose.model("Project", ProjectSchema);
 
 export type ProjectDocument = mongoose.Document & {
   userId: {
@@ -76,6 +75,10 @@ export type ProjectDocument = mongoose.Document & {
   };
   subtitle: string;
   description: string;
+  key: string;
   createdAt: string;
   updateAt: string;
 };
+
+
+export const Project = mongoose.model<ProjectDocument>("Project", ProjectSchema);
