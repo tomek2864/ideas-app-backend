@@ -1,59 +1,57 @@
 import { Request, Response } from "express";
 import { check, validationResult, buildCheckFunction } from "express-validator";
-import { Project, ProjectDocument, Intention, IntentionDocument } from "../models/schema";
+import { Project, ProjectDocument, UserDocument } from "../models/schema";
 import mongoose from "mongoose";
+import { createProject } from "../models/project";
+import { to } from "await-to-js";
 const checkBodyAndQuery = buildCheckFunction(["body", "query"]);
 
 // @route   POST project/add
 // @desc    Create new project
-export const createProject = async (req: Request, res: Response) => {
+export const postProject = async (req: Request, res: Response) => {
   await check("title").isString().notEmpty().isLength({ max: 150 }).run(req);
+  await check("key").isString().notEmpty().isLength({ min: 2, max: 4 }).run(req);
   await check("subtitle").isString().isLength({ max: 250 }).run(req);
   await check("description").isString().isLength({ max: 1500 }).run(req);
   await check("intentionId").run(req);
 
-  try {
-    const result = validationResult(req);
-    const idValidation = mongoose.Types.ObjectId.isValid(req.body.intentionId);
-    if (!result.isEmpty()) {
-      return res.status(400).json({ success: false, errors: result.array() });
-    }
-    if (!idValidation) {
-      return res.status(400).json({ success: false, errors: ["Invalid intention id"] });
-    }
-    await Intention.findById({ _id: req.body.intentionId, userId: req.user }, async function (err, intention: IntentionDocument) {
-      if (err) {
-        return res.status(400).json({ success: false });
-      }
-      if (!intention) {
-        return res.status(404).json({ success: false });
-      }
-
-      const newProject = await Project.create({
-        userId: req.user,
-        intentionId: req.body.intentionId,
-        title: req.body.title,
-        subtitle: req.body.subtitle,
-        description: req.body.description,
-        key:"ABC"
-      });
-      newProject
-        .save()
-        .then((project) =>
-          res.status(200).json({
-            success: true,
-            data: {
-              id: project._id,
-            },
-          }),
-        )
-        .catch(() => {
-          return res.status(422).json({ success: false });
-        });
-    });
-  } catch (err) {
-    return res.status(500);
+  const result = validationResult(req);
+  const idValidation = mongoose.Types.ObjectId.isValid(req.body.intentionId);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ success: false, errors: result.array() });
   }
+  if (!idValidation) {
+    return res.status(400).json({ success: false, errors: ["Invalid intention id"] });
+  }
+
+  const user = req.user as UserDocument;
+  console.log(user);
+  const { key, description, title, subtitle, intentionId } = req.body;
+      const [error, project] = await to(
+        createProject({
+          key,
+          description,
+          title,
+          subtitle,
+          user,
+          intentionId,
+        }),
+      );
+
+      if (error) {
+        return res.status(422).json({ success: false, errors: [error]  });
+      }
+      const projectToSend = project as ProjectDocument;
+      return res.status(200).json({
+        success: true,
+        data: {
+          key: projectToSend.key,
+          title: projectToSend.title,
+          subtitle: projectToSend.subtitle,
+          description: projectToSend.description,
+          intentionId: projectToSend.intentionId,
+        },
+      });
 };
 
 // @route   GET /projects/:intentionId
@@ -77,7 +75,7 @@ export const getProjects = async (req: Request, res: Response) => {
     }
 
     const options = {
-      select: "title subtitle description createdAt",
+      select: "title subtitle key description createdAt",
       sort: { createdAt: req.query.sorting === "desc" ? -1 : 1 },
       page: parseInt(req.query.pageNumber || 1),
       limit: parseInt(req.query.itemsPerPage || 100),

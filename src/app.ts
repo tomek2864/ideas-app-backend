@@ -96,7 +96,7 @@ app.post(
   "/api/v1/project",
   passport.authenticate("jwt", { session: false }),
   utils.checkIsInRole(UserType.FREE, UserType.PREMIUM, UserType.ADMIN),
-  projectController.createProject,
+  projectController.postProject,
 );
 app.get(
   "/api/v1/projects/:intentionId",

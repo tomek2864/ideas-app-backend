@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-import { Subproject } from "./Subproject";
 import { Issue } from "./Issue";
-import { resolve } from "bluebird";
 
 const mongoosePaginate = require("mongoose-paginate");
 
@@ -23,7 +21,12 @@ const ProjectSchema = new mongoose.Schema(
     },
     subtitle: String,
     description: String,
-    key: String,
+    key: {
+      type: String,
+      required: [true, "Key is require"],
+      unique : true,
+      dropDups: true
+    },
   },
   {
     timestamps: true,
@@ -47,13 +50,12 @@ ProjectSchema.virtual("issues", {
 ProjectSchema.set("toObject", { virtuals: true });
 ProjectSchema.set("toJSON", { virtuals: true });
 
-ProjectSchema.pre("remove", function (next) {
+/* ProjectSchema.pre("remove", function (next) {
   // 'this' is the client being removed. Provide callbacks here if you want
   // to be notified of the calls' result.
   Subproject.remove({ projectId: this._id }).exec();
   next();
-});
-
+}); */
 
 ProjectSchema.methods.generateIssueKeyName = async function () {
   const issueKey = await Issue.find({ projectId: this._id });
@@ -69,13 +71,23 @@ export type ProjectDocument = mongoose.Document & {
     ref: "User";
     required: [true, "Title is require"];
   };
+  intentionId: {
+    type: mongoose.Schema.Types.ObjectId;
+    required: true;
+    ref: "Intention";
+  };
   title: {
     type: string;
     required: [true, "Title is require"];
   };
   subtitle: string;
   description: string;
-  key: string;
+  key: {
+    type: string;
+    required: [true, "Key is require"];
+    unique: true;
+    dropDups: true;
+  };
   createdAt: string;
   updateAt: string;
 };
