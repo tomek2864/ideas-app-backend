@@ -1,5 +1,5 @@
 {
-  "name": "auth-service",
+  "name": "ideas-app",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,12 +10,15 @@
     "test": "SET NODE_ENV=test&& find ./test -name '*spec.ts' | xargs mocha --exit -r ts-node/register ",
     "coverage": "nyc --reporter=html --reporter=text mocha --exit --timeout 15000",
     "build-ts": "tsc",
-    "lint-fix": "tsc --noEmit && eslint --ext ts src --fix"
+    "lint-fix": "tsc --noEmit && eslint --ext ts src --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --list-different src/**/*.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/mongoose-paginate": "^5.0.8",
+    "@types/swagger-ui-express": "^4.1.2",
     "async": "^3.2.0",
     "await-to-js": "^2.1.1",
     "bcrypt": "^4.0.0",
@@ -24,6 +27,7 @@
     "compression": "^1.7.4",
     "connect-mongo": "^3.2.0",
     "dotenv": "^8.2.0",
+    "eslint-config-prettier": "^6.11.0",
     "express": "^4.17.1",
     "express-flash": "0.0.2",
     "express-session": "^1.17.0",
@@ -36,8 +40,12 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "prettier": "^2.0.5",
+    "prettier-eslint": "^9.0.1",
+    "prettier-eslint-cli": "^5.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
+    "swagger-ui-express": "^4.1.4",
     "winston": "^3.2.1"
   },
   "devDependencies": {
@@ -78,7 +86,7 @@
     "nodemon": "^2.0.2",
     "sinon": "^9.0.1",
     "supertest": "^4.0.2",
-    "ts-jest": "^25.2.1",
+    "ts-jest": "^25.4.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   }
